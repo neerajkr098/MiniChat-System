@@ -5,7 +5,7 @@ const path = require("path");
 const Chat = require("./models/chat.js");
 const methodOverride = require("method-override");
 
-app.set("views", path.join(__dirname, "views")); // set-up ofd wies folder here
+app.set("views", path.join(__dirname, "views")); // set-up of views folder here
 app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: true }));
@@ -35,7 +35,7 @@ app.get("/chats/new", (req, res) => {
 });
 
 // Create Route
-app.post("/chats", (req, res) => {
+app.post("/chats", async (req, res) => {
   let { from, to, msg } = req.body;
   let newChat = new Chat({
     from: from,
@@ -43,15 +43,14 @@ app.post("/chats", (req, res) => {
     msg: msg,
     created_at: new Date(),
   });
-  newChat
-    .save()
-    .then((res) => {
-      console.log("chat was saved");
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-  res.redirect("/chats");
+  try {
+    await newChat.save();
+    console.log("chat was saved");
+    res.redirect("/chats");
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Error saving chat");
+  }
 });
 
 //Edit Routes
